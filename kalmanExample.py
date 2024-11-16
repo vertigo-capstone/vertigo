@@ -52,6 +52,11 @@ while True:
 
         data = {"roll": sensorfusion.roll, "pitch": sensorfusion.pitch, "yaw": sensorfusion.yaw}
         print(data)
+        file_path = '/home/vertigo/vertigo/gyro.json'
+        # 데이터 파일에 저장
+        with open(file_path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+        print(f"'{file_path}'에 JSON 데이터를 저장했습니다.")
 
     except (OSError, ValueError) as e:
         print(f"Error: {e}. Retrying sensor setup in 5 seconds...")
