@@ -2,6 +2,7 @@ import serial
 import json
 import matplotlib.pyplot as plt
 import numpy as np
+import csv
 
 # 아두이노와 연결된 시리얼 포트 설정 (예: /dev/ttyUSB0)
 arduino_port = '/dev/ttyACM0'
@@ -29,46 +30,54 @@ line, = ax.plot(x_data, y_data, 'r-')  # 초기 선 그리기
 # 시간 변수
 time_elapsed = 0
 
-# 실시간 데이터 수집 및 플로팅
-while True:
-    if ser.in_waiting > 0:
-        # 시리얼 데이터 읽기 (바이트 단위로 읽기)
-        byte_data = ser.readline()
+# CSV 파일 초기화 (파일을 처음 생성하거나 기존 파일에 덧붙임)
+with open('sensor_data.csv', mode='w', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerow(['Time', 'Sensor Value'])  # CSV 파일 헤더
 
-        if byte_data:
-            try:
-                # 바이트 데이터를 문자열로 디코딩
-                decoded_data = byte_data.decode('utf-8', errors='ignore').strip()
+    # 실시간 데이터 수집 및 플로팅
+    while True:
+        if ser.in_waiting > 0:
+            # 시리얼 데이터 읽기 (바이트 단위로 읽기)
+            byte_data = ser.readline()
 
-                if decoded_data:
-                    # JSON 형식으로 파싱
-                    json_data = json.loads(decoded_data)
-                    sensor_value = json_data.get("sensor_value", None)
+            if byte_data:
+                try:
+                    # 바이트 데이터를 문자열로 디코딩
+                    decoded_data = byte_data.decode('utf-8', errors='ignore').strip()
 
-                    if sensor_value is not None:
-                        # 데이터 리스트에 추가
-                        x_data.append(time_elapsed)
-                        y_data.append(sensor_value)
+                    if decoded_data:
+                        # JSON 형식으로 파싱
+                        json_data = json.loads(decoded_data)
+                        sensor_value = json_data.get("sensor_value", None)
 
-                        # 그래프 업데이트
-                        line.set_xdata(x_data)
-                        line.set_ydata(y_data)
+                        if sensor_value is not None:
+                            # 데이터 리스트에 추가
+                            x_data.append(time_elapsed)
+                            y_data.append(sensor_value)
 
-                        # x축 범위 업데이트 (최대 1000개 데이터로 제한)
-                        if len(x_data) > 1000:
-                            x_data = x_data[-1000:]
-                            y_data = y_data[-1000:]
+                            # CSV 파일에 저장 (실시간으로)
+                            writer.writerow([time_elapsed, sensor_value])
 
-                        ax.relim()  # 데이터에 맞게 축의 범위 재계산
-                        ax.autoscale_view(True, True, True)
+                            # 그래프 업데이트
+                            line.set_xdata(x_data)
+                            line.set_ydata(y_data)
 
-                        # 화면 업데이트
-                        plt.pause(0.01)
+                            # x축 범위 업데이트 (최대 1000개 데이터로 제한)
+                            if len(x_data) > 1000:
+                                x_data = x_data[-1000:]
+                                y_data = y_data[-1000:]
 
-                        # 시간 증가
-                        time_elapsed += 1
+                            ax.relim()  # 데이터에 맞게 축의 범위 재계산
+                            ax.autoscale_view(True, True, True)
 
-            except (json.JSONDecodeError, UnicodeDecodeError) as e:
-                print(f"Error decoding data: {e}, Raw data: {byte_data}")
-    
-    plt.pause(0.01)  # 그래프 갱신을 위한 짧은 대기
+                            # 화면 업데이트
+                            plt.pause(0.01)
+
+                            # 시간 증가
+                            time_elapsed += 1
+
+                except (json.JSONDecodeError, UnicodeDecodeError) as e:
+                    print(f"Error decoding data: {e}, Raw data: {byte_data}")
+
+        plt.pause(0.01)  # 그래프 갱신을 위한 짧은 대기
