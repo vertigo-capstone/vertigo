@@ -1,5 +1,5 @@
 # Firebase 서비스 계정 키 파일
-vertigo-firebase.json
+firebase/vertigo-firebase.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
