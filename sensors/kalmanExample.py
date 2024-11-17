@@ -32,6 +32,17 @@ if not initialize_sensor():
 
 currTime = time.time()
 
+# 넘어짐 감지 임계값
+ACC_THRESHOLD = 9.5  # z축의 가속도가 9.5보다 작으면 넘어졌다고 판단
+TILT_THRESHOLD = 30  # 기울기 각도 임계값 (roll 또는 pitch가 이 값을 넘으면 넘어짐)
+
+def is_fallen(accel_vals, roll, pitch):
+    # 가속도 값이 너무 작거나, 기울기가 너무 크면 넘어졌다고 판단
+    accel_magnitude = np.sqrt(accel_vals[0]**2 + accel_vals[1]**2 + accel_vals[2]**2)
+    if accel_magnitude < ACC_THRESHOLD or abs(roll) > TILT_THRESHOLD or abs(pitch) > TILT_THRESHOLD:
+        return True
+    return False
+
 while True:
     try:
         imu.readSensor()
@@ -52,6 +63,14 @@ while True:
 
         data = {"roll": sensorfusion.roll, "pitch": sensorfusion.pitch, "yaw": sensorfusion.yaw}
         print(data)
+
+        # 넘어짐 감지
+        if is_fallen(imu.AccelVals, sensorfusion.roll, sensorfusion.pitch):
+            print("Fall detected!")
+            data["fall_detected"] = True
+        else:
+            data["fall_detected"] = False
+
         file_path = '/home/vertigo/vertigo/gyro.json'
         # 데이터 파일에 저장
         with open(file_path, 'w', encoding='utf-8') as f:
@@ -63,4 +82,4 @@ while True:
         time.sleep(5)
         initialize_sensor()  # 센서를 다시 초기화
 
-    time.sleep(1/8000)
+    time.sleep(1)
