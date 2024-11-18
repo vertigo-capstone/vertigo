@@ -4,7 +4,7 @@ from serial_reader import SerialReader
 from plotter import Plotter
 
 # Set up SerialReader and Plotter
-serial_reader = SerialReader('/dev/ttyUSB0')  # Update to match your system's port
+serial_reader = SerialReader('/dev/ttyACM0')  # Update to match your system's port
 plotter = Plotter(serial_reader.heart_rates)
 
 def read_data():
