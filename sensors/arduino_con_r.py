@@ -1,6 +1,8 @@
 import numpy as np
 import serial
 import json
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
 
 # 아두이노와 연결된 시리얼 포트 설정 (예: COM3 또는 /dev/ttyUSB0 등)
 arduino_port = '/dev/ttyACM0'  # Windows의 경우 'COM3' 또는 아두이노 포트를 설정
