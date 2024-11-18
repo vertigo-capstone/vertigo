@@ -1,45 +1,57 @@
-#include <SoftwareSerial.h>
-#include <TinyGPS++.h>
+#include <TinyGPS++.h>  // TinyGPS++ 라이브러리 포함
+#include <ArduinoJson.h>
 
-// GPS와 연결된 소프트웨어 시리얼 포트 설정
-SoftwareSerial gpsSerial(3, 4); // RX, TX 핀 설정
-
-// TinyGPS++ 객체 생성
-TinyGPSPlus gps;
+TinyGPSPlus gps;  // TinyGPS++ 객체 생성
+int cnt = 0;
+int cnt_max = 4096;
 
 void setup() {
-  Serial.begin(9600);    // 기본 시리얼 포트 (USB 연결)
-  gpsSerial.begin(9600); // GPS 모듈과의 시리얼 통신
-  pinMode(A0, INPUT);    // 심박 센서 핀 설정
+  Serial.begin(9600);   // 시리얼 모니터와 연결 (9600 baud)
+  Serial1.begin(9600);  // GPS 모듈과 연결된 하드웨어 시리얼 포트 (Serial1)
+  Serial.println("Init GPS...");
+  pinMode(A0, INPUT);
 }
 
 void loop() {
-  // 심박 센서 데이터 읽기
   int heartRate = analogRead(A0);
-
-  // GPS 데이터 읽기
-  while (gpsSerial.available()) {
-    gps.encode(gpsSerial.read());
+  cnt += 1;
+  if (cnt == cnt_max) {
+    cnt = 0;
   }
-
-  // 심박 센서 값 시리얼 모니터에 출력
-  Serial.print("Heart Rate (A0): ");
+  while (Serial1.available()) {  // Serial1에서 데이터를 읽기
+    char c = Serial1.read();    // 읽은 데이터를 저장
+    gps.encode(c);  // GPS 데이터 처리 (NMEA 문장)
+  }
+  if (cnt == 2) {
+  Serial.print("Heart Rate (A0):");
   Serial.print(heartRate);
-  Serial.print(", ");
-
-  // GPS 데이터가 완전히 수신되었을 때 출력
-  if (gps.location.isUpdated()) {
-    // 위도와 경도 출력 (단위: 도)
-    double latitude = gps.location.lat();
-    double longitude = gps.location.lng();
-    
-    Serial.print("Latitude: ");
-    Serial.print(latitude, 6); // 위도 (소수점 6자리까지 출력)
-    Serial.print(", Longitude: ");
-    Serial.println(longitude, 6); // 경도 (소수점 6자리까지 출력)
-  } else {
-    Serial.println("Waiting for GPS data...");
+  Serial.println(", ");
   }
+  // 데이터가 유효할 때만 출력
+  if (gps.location.isValid()) {
+    if (cnt == 1) {
+      // JsonDocument 사용
+      JsonDocument jsonDoc;  // JsonDocument 객체 생성 (크기 자동 관리)
 
-  delay(1000); // 1초 간격으로 데이터 전송
+      // GPS 데이터를 JSON 객체에 추가
+      jsonDoc["latitude"] = gps.location.lat();  // 위도
+      jsonDoc["longitude"] = gps.location.lng();  // 경도
+
+      // JSON 객체를 문자열로 변환하여 출력
+      char jsonBuffer[256];
+      serializeJson(jsonDoc, jsonBuffer);
+      Serial.println(jsonBuffer);
+
+      Serial.print("위도는: ");
+      Serial.print(gps.location.lat(), 6);  // 위도 출력 (소수점 6자리)
+      Serial.print(" , ");
+      Serial.print("경도는: ");
+      Serial.println(gps.location.lng(), 6);  // 경도 출력 (소수점 6자리)
+    }
+  }
+  else {
+    if (cnt == 1) {
+      Serial.println("GPS 신호를 찾는 중...");
+    }
+  }
 }
