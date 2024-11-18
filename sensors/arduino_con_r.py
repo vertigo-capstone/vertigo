@@ -1,3 +1,4 @@
+import numpy as np
 import serial
 import json
 
@@ -7,27 +8,25 @@ baud_rate = 9600  # 아두이노와 동일한 baud_rate 설정
 
 # 시리얼 포트 열기
 ser = serial.Serial(arduino_port, baud_rate)
-
+heart_i = np.array([])
+at = None
+ng = None
 # 시리얼 데이터를 읽고 처리
 try:
     while True:
         # 시리얼 포트에서 한 줄을 읽음
         line = ser.readline().decode('utf-8').strip()
-
-        if line:  # 빈 줄을 건너뜀
-            print("Received data:", line)
-
-            # JSON 데이터인 경우 처리
-            try:
-                json_data = json.loads(line)
-                latitude = json_data.get('latitude', None)
-                longitude = json_data.get('longitude', None)
-
-                if latitude and longitude:
-                    print(f"Latitude: {latitude}, Longitude: {longitude}")
-            except json.JSONDecodeError:
-                print("Received non-JSON data:", line)
-        
+        print("읽은 데이터는 다음과 같습니다:", line)
+        if line[0] == "h":
+            heart_i = np.append(heart_i, int(line[1:]))
+        elif line[0] == "a":
+            at = float(line[1:])
+        elif line[0] == "n":
+            ng = float(line[1:])
+        data = {"위도":at, "경도":ng}
+        print(data)
+        heart_i = heart_i.astype(int)
+        print(heart_i)
 except KeyboardInterrupt:
     print("프로그램을 종료합니다.")
 finally:
