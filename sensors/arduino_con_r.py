@@ -27,6 +27,8 @@ try:
             at = float(line[1:])
         elif line[0] == "n":
             ng = float(line[1:])
+        else:
+            pass
         data = {"latitude":at, "longitude":ng}
         print(data)
         heart_i = heart_i.astype(int)
