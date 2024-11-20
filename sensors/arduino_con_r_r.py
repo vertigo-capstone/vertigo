@@ -13,10 +13,10 @@ ser = serial.Serial(arduino_port, baud_rate)
 heart_i = np.array([])
 at = None
 ng = None
-location = "data.json"
+loc = "data.json"
 #json 쓰기 함수
-def json_write(loc, let_data):
-    with open(loc, "w") as json_file:
+def json_write(let_loc, let_data):
+    with open(let_loc, "w") as json_file:
             json.dump(let_data, json_file, indent=4)  # indent=4로 보기 좋게 포맷
 #시리얼 읽기 함수
 def ser_read(let_ser):
@@ -25,7 +25,7 @@ def ser_read(let_ser):
 # 시리얼 데이터를 읽고 처리
 try:
     while True:
-        line = ser_read(ser)
+        line = ser_read(location)
         print("읽은 데이터는 다음과 같습니다:", line)
         if line[0] == "h":
             heart_i = np.append(heart_i, int(line[1:]))
