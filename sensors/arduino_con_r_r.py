@@ -13,7 +13,7 @@ ser = serial.Serial(arduino_port, baud_rate)
 heart_i = np.array([])
 at = None
 ng = None
-loc = "data.json"
+loc = "/home/vertigo/vertigo/sensors/information_data/location.json"
 #json 쓰기 함수
 def json_write(let_loc, let_data):
     with open(let_loc, "w") as json_file:
