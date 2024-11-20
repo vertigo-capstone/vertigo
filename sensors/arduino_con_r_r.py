@@ -20,14 +20,20 @@ def ser_read(let_ser):
     let_line = let_ser.readline().decode('utf-8').strip()
     return let_line
 # 시리얼 데이터를 읽고 처리
+def processing_heart(let_line, let_heart_i):
+    if let_line == (None or ""):
+        pass
+    elif let_line[0] == "h":
+        let_heart_i = np.append(let_heart_i, int(line[1:]))
+    let_heart_i = let_heart_i.astype(int)
+    print(let_heart_i)
 try:
     while True:
         line = ser_read(serial.Serial(arduino_port, baud_rate))
         print("읽은 데이터는 다음과 같습니다:", line)
+        processing_heart(line, heart_i)
         if line == (None or ""):
             pass
-        elif line[0] == "h":
-            heart_i = np.append(heart_i, int(line[1:]))
         elif line[0] == "a":
             at = float(line[1:])
         elif line[0] == "n":
@@ -36,8 +42,6 @@ try:
             pass
         data = {"latitude":at, "longitude":ng}
         print(data)
-        heart_i = heart_i.astype(int)
-        print(heart_i)
         json_write(loc, data)
 except KeyboardInterrupt:
     print("프로그램을 종료합니다.")
