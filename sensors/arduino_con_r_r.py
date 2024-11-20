@@ -20,14 +20,16 @@ def json_write(let_loc, let_data):
             json.dump(let_data, json_file, indent=4)  # indent=4로 보기 좋게 포맷
 #시리얼 읽기 함수
 def ser_read(let_ser):
-    line = ser.readline().decode('utf-8').strip()
+    let_line = ser.readline().decode('utf-8').strip()
     return let_line
 # 시리얼 데이터를 읽고 처리
 try:
     while True:
-        line = ser_read(location)
+        line = ser_read(loc)
         print("읽은 데이터는 다음과 같습니다:", line)
-        if line[0] == "h":
+        if line == (None or ""):
+            pass
+        elif line[0] == "h":
             heart_i = np.append(heart_i, int(line[1:]))
         elif line[0] == "a":
             at = float(line[1:])
@@ -40,8 +42,6 @@ try:
         heart_i = heart_i.astype(int)
         print(heart_i)
         json_write(loc, data)
-except IndexError as e:
-    print(f"인덱스 오류 발생: {e}")
 except KeyboardInterrupt:
     print("프로그램을 종료합니다.")
 finally:
