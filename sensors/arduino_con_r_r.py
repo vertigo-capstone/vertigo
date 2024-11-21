@@ -24,23 +24,40 @@ def processing_heart(let_line, let_heart_i):
     if let_line == (None or ""):
         pass
     elif let_line[0] == "h":
-        let_heart_i = np.append(let_heart_i, int(line[1:]))
+        let_heart_i = let_heart_i + np.array([int(line[1:])])
     let_heart_i = let_heart_i.astype(int)
     print(let_heart_i)
+def processing_at(let_line):
+    if let_line == (None or ""):
+        pass
+    elif let_line[0] == "a":
+        return float(line[1:])
+def processing_ng(let_line):
+    if let_line == (None or ""):
+        pass
+    elif let_line[0] == "n":
+        return float(line[1:])
+def make_json(let_at, let_ng):
+    return {"latitude":at, "longitude":ng}
+#############################################
+def  main(let_line, let_loc):
+    print("읽은 데이터는 다음과 같습니다:", line)
+    processing_heart(let_line, let_heart_i)
+    let_at = processing_at(let_line)
+    let_ng = processing_ng(let_line)
+    let_data = make_json(let_at, let_ng)
+    print(let_data)
+    json_write(let_loc, let_data)
+    main(let_line, let_loc)
+#############################################
 try:
     while True:
         line = ser_read(serial.Serial(arduino_port, baud_rate))
         print("읽은 데이터는 다음과 같습니다:", line)
         processing_heart(line, heart_i)
-        if line == (None or ""):
-            pass
-        elif line[0] == "a":
-            at = float(line[1:])
-        elif line[0] == "n":
-            ng = float(line[1:])
-        else:
-            pass
-        data = {"latitude":at, "longitude":ng}
+        at = processing_at(line)
+        ng = processing_ng(line)
+        data = make_json(at, ng)
         print(data)
         json_write(loc, data)
 except KeyboardInterrupt:
