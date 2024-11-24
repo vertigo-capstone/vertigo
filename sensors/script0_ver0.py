@@ -30,6 +30,7 @@ baud_rate = 9600  # 아두이노와 동일한 baud_rate 설정
 
 # 시리얼 포트 열기
 ser = serial.Serial(arduino_port, baud_rate)
+#ecg_data = np.load('ecg_data.npy') 나중에 아래와 바꾸기
 ecg_data = np.array([])
 at = None
 ng = None
@@ -61,17 +62,17 @@ try:
             ng = float(line[1:])
         else:
             pass
-        data = {"latitude":at, "longitude":ng}
-        print(data)
+        gps_data = {"latitude":at, "longitude":ng}
+        print(gps_data)
         ecg_data = ecg_data.astype(int)
-        print(ecg_data)
+        #print(ecg_data)
         with open("gyro_data.json", "w") as json_file:
             json.dump(gyro_val, json_file, indent=4)  # indent=4로 보기 좋게 포맷
         with open("gps_data.json", "w") as json_file:
-            json.dump(data, json_file, indent=4)  # indent=4로 보기 좋게 포맷
+            json.dump(gps_data, json_file, indent=4)  # indent=4로 보기 좋게 포맷
         np.save('ecg_data.npy', ecg_data)
-        #loaded_data = np.load('ecg_data.npy')
-        #print(loaded_data)
+        loaded_data = np.load('ecg_data.npy')
+        print(loaded_data)
 except IndexError as e:
     print(f"인덱스 오류 발생: {e}")
 except KeyboardInterrupt:
