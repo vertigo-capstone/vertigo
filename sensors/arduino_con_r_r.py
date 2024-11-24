@@ -7,9 +7,9 @@ from matplotlib.animation import FuncAnimation
 arduino_port = '/dev/ttyACM0'  #포트 주소
 baud_rate = 9600  # 아두이노와 동일한 baud_rate로 설정
 # 시리얼 포트 열기
+ser = serial.Serial(arduino_port, baud_rate)
 heart_i = np.array([])
-at = None
-ng = None
+at, ng = None, None
 loc = "/home/vertigo/vertigo/sensors/information_data/gps_data.json"
 #json 쓰기 함수
 def json_write(let_loc, let_data):
@@ -22,45 +22,49 @@ def ser_read(let_ser):
 # 시리얼 데이터를 읽고 처리
 def processing_heart(let_line, let_heart_i):
     if let_line == (None or ""):
-        pass
+        return let_heart_i
     elif let_line[0] == "h":
-        let_heart_i = let_heart_i + np.array([int(line[1:])])
-    let_heart_i = let_heart_i.astype(int)
-    print(let_heart_i)
-def processing_at(let_line):
+        let_heart_i_apd = np.append(let_heart_i, int(line[1:]))
+    return let_heart_i_apd
+def processing_at(let_at, let_line):
     if let_line == (None or ""):
-        pass
+        return let_at
     elif let_line[0] == "a":
         return float(line[1:])
-def processing_ng(let_line):
+def processing_ng(let_ng, let_line):
     if let_line == (None or ""):
-        pass
+        return let_ng
     elif let_line[0] == "n":
         return float(line[1:])
-def make_json(let_at, let_ng):
-    return {"latitude":at, "longitude":ng}
-#############################################
-def  main(let_line, let_loc):
-    print("읽은 데이터는 다음과 같습니다:", line)
-    processing_heart(let_line, let_heart_i)
-    let_at = processing_at(let_line)
-    let_ng = processing_ng(let_line)
-    let_data = make_json(let_at, let_ng)
-    print(let_data)
-    json_write(let_loc, let_data)
-    main(let_line, let_loc)
-#############################################
+def make_dict(let_at, let_ng):
+    return {"latitude":let_at, "longitude":let_ng}
+# 시리얼 데이터를 읽고 처리
 try:
     while True:
-        line = ser_read(serial.Serial(arduino_port, baud_rate))
+        # 시리얼 포트에서 한 줄을 읽음
+        line = ser_read(ser)
         print("읽은 데이터는 다음과 같습니다:", line)
-        processing_heart(line, heart_i)
-        at = processing_at(line)
-        ng = processing_ng(line)
-        data = make_json(at, ng)
+        heart_i = processing_heart(line, heart_i)
+        print(at, ng)
+        if line == (None or ""):
+            pass
+        #elif line[0] == "h":
+        #    heart_i = np.append(heart_i, int(line[1:]))
+        elif line[0] == "a":
+            at = float(line[1:])
+        elif line[0] == "n":
+            ng = float(line[1:])
+        else:
+            pass
+        data = {"latitude":at, "longitude":ng}
         print(data)
-        json_write(loc, data)
+        #heart_i = heart_i.astype(int)
+        print(heart_i)
+        with open("data.json", "w") as json_file:
+            json.dump(data, json_file, indent=4)  # indent=4로 보기 좋게 포맷
+except IndexError as e:
+    print(f"인덱스 오류 발생: {e}")
 except KeyboardInterrupt:
     print("프로그램을 종료합니다.")
 finally:
-    serial.Serial(arduino_port, baud_rate).close()  # 시리얼 포트 닫기
+    ser.close()  # 시리얼 포트 닫기
