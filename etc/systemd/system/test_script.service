@@ -1,0 +1,14 @@
+[Unit]
+Description=Test Script for Auto Execution
+After=multi-user.target
+
+[Service]
+ExecStart=/usr/bin/python3 /home/vertigo/vertigo/test_script.py
+WorkingDirectory=/home/vertigo/vertigo
+StandardOutput=inherit
+StandardError=inherit
+Restart=on-failure
+User=vertigo
+
+[Install]
+WantedBy=multi-user.target
