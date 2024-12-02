@@ -1,0 +1,18 @@
+#!/bin/bash
+[Unit]
+Description=Run Project Scripts on Boot
+After=multi-user.target
+
+[Service]
+# start_all.sh의 절대경로 지정
+ExecStart=/bin/bash /vertigo/start_all.sh
+# 서비스가 실행되는 최상위 디렉토리
+WorkingDirectory=/home/pi/vertigo
+# user name
+User=pi
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+
