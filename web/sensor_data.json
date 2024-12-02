@@ -1,0 +1,16 @@
+{
+    "sensor": {
+        "gyroscope": {
+            "roll": "18",
+            "pitch": "20",
+            "yaw": "97"
+        },
+        "heart": {
+            "rate": "88"
+        },
+        "GPS": {
+            "latitude": "4",
+            "longitude": "75"
+        }
+    }
+}

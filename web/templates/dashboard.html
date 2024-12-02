@@ -1,0 +1,33 @@
+<h1>Welcome, {{ username }}!</h1>
+
+<h2>Sensor Data</h2>
+
+{% if sensor_data.gyroscope %}
+    <p>Gyroscope:</p>
+    <ul>
+        <li>Roll: {{ sensor_data['gyroscope']['roll'] }}</li>
+        <li>Pitch: {{ sensor_data['gyroscope']['pitch'] }}</li>
+        <li>Yaw: {{ sensor_data['gyroscope']['yaw'] }}</li>
+    </ul>
+{% else %}
+    <p>No gyroscope data available.</p>
+{% endif %}
+
+{% if sensor_data.heart %}
+    <p>Heart Rate:</p>
+    <ul>
+        <li>Rate: {{ sensor_data['heart']['rate'] }}</li>
+    </ul>
+{% else %}
+    <p>No heart rate data available.</p>
+{% endif %}
+
+{% if sensor_data.GPS %}
+    <p>GPS:</p>
+    <ul>
+        <li>Latitude: {{ sensor_data['GPS']['latitude'] }}</li>
+        <li>Longitude: {{ sensor_data['GPS']['longitude'] }}</li>
+    </ul>
+{% else %}
+    <p>No GPS data available.</p>
+{% endif %}
